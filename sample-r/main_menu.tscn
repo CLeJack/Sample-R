@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://bh8dx5firfk0i"]
+
+[ext_resource type="Script" uid="uid://ce5hw02nj6bev" path="res://main_menu.gd" id="1_06t4h"]
+[ext_resource type="Script" uid="uid://yk7f7bbbbd0i" path="res://load_button.gd" id="2_jix8l"]
+[ext_resource type="Script" uid="uid://m82uw6s48gne" path="res://analyze_button.gd" id="3_glbon"]
+[ext_resource type="Script" uid="uid://b4qrh7kkuache" path="res://sort_button.gd" id="4_nlkkf"]
+
+[node name="MainMenu" type="VBoxContainer" unique_id=1123445622]
+offset_right = 230.0
+offset_bottom = 649.0
+script = ExtResource("1_06t4h")
+
+[node name="LoadButton" type="Button" parent="." unique_id=1736272483]
+layout_mode = 2
+text = "Load"
+script = ExtResource("2_jix8l")
+
+[node name="AnalyzeButton" type="Button" parent="." unique_id=1183846718]
+layout_mode = 2
+text = "Analyze"
+script = ExtResource("3_glbon")
+
+[node name="SortButton" type="Button" parent="." unique_id=1945505947]
+layout_mode = 2
+text = "Sort"
+script = ExtResource("4_nlkkf")
+
+[node name="FileDialog" type="FileDialog" parent="." unique_id=1792325577]
