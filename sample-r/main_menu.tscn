@@ -4,6 +4,19 @@
 [ext_resource type="Script" uid="uid://yk7f7bbbbd0i" path="res://load_button.gd" id="2_jix8l"]
 [ext_resource type="Script" uid="uid://m82uw6s48gne" path="res://analyze_button.gd" id="3_glbon"]
 [ext_resource type="Script" uid="uid://b4qrh7kkuache" path="res://sort_button.gd" id="4_nlkkf"]
+[ext_resource type="Script" uid="uid://dqchhn3xu04qw" path="res://export_button.gd" id="5_glbon"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jix8l"]
+bg_color = Color(0.5, 0.5, 0.5, 0.46666667)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glbon"]
+bg_color = Color(0.5019608, 0.5019608, 0.5019608, 0.46666667)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nlkkf"]
+bg_color = Color(0.5019608, 0.5019608, 0.5019608, 0.46666667)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qe12f"]
+bg_color = Color(0.5019608, 0.5019608, 0.5019608, 0.46666667)
 
 [node name="MainMenu" type="VBoxContainer" unique_id=1123445622]
 offset_right = 230.0
@@ -12,17 +25,26 @@ script = ExtResource("1_06t4h")
 
 [node name="LoadButton" type="Button" parent="." unique_id=1736272483]
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_jix8l")
 text = "Load"
 script = ExtResource("2_jix8l")
 
 [node name="AnalyzeButton" type="Button" parent="." unique_id=1183846718]
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_glbon")
 text = "Analyze"
 script = ExtResource("3_glbon")
 
 [node name="SortButton" type="Button" parent="." unique_id=1945505947]
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_nlkkf")
 text = "Sort"
 script = ExtResource("4_nlkkf")
 
 [node name="FileDialog" type="FileDialog" parent="." unique_id=1792325577]
+
+[node name="ExportButton" type="Button" parent="." unique_id=394780667]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_qe12f")
+text = "Export"
+script = ExtResource("5_glbon")

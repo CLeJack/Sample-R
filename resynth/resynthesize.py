@@ -20,8 +20,6 @@ class AudioData:
         self.min_freq = 0
         self.data= np.zeros(1)
         self.name = ""
-        self.path = ""
-        self.id = 0
         self.nspectrum = [] # note (12tet) based frequency spectrum
         self.hspectrum = [] # harmonic based frequency spectrum built from the fundamental
         self.nmat = [] # note based dft matrix
