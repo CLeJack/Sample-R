@@ -1,0 +1,8 @@
+Project:
+This is Sampler-R, a tool that ingests .wav files from a user, analyzes the signal to determine the fundamental frequency
+and then shifts the spectrum of the signal to recreate a single cycle of the waveform with a framesize of 2048
+
+Architecture:
+- GUI Tkinter components that rely upon a message passing system to communicate with the system model
+- Frequency Analysis: numpy and pandas driven with some custom dsp logic
+- Model: run DSP or UI logic based on message polling from a singular message bus

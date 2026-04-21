@@ -1,0 +1,7 @@
+data/app/*
+!data/app/.gitkeep
+data/input/*
+!data/input/.gitkeep
+data/output/*
+!data/output/.gitkeep
+/notebook/
