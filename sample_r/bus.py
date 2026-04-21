@@ -3,37 +3,40 @@ from enum import Enum, auto
 from collections import deque
 from typing import Any
 
-class ComponentType(Enum):
-    NULL = auto()      # The "Empty" type
-    BUTTON = auto()
-    CHECKBOX = auto()
-    TEXTENTRY = auto()
-    SLIDER = auto()
+class MessageType(Enum):
+    NULL = auto()
+    # System/File Events
+    IMPORT = auto()
+    IMPORT_FAILURE = auto()
+    EXPORT = auto()
+    # UI State Events
+    ELEMENT_SELECTED = auto()
+    DATA_LOADED = auto()
+    # Action Events
+    REQ_REANALYZE = auto()
+    UPDATE_INFO = auto()
+    TOP_MENU = auto()
 
 @dataclass(frozen=True)
 class UIMessage:
-    sender_type: ComponentType
-    sender_id: int
+    msg_type: MessageType
+    sender_id: int  # Changed to str for more descriptive IDs like "btn_import"
     value: Any
 
-
-EMPTY_MSG = UIMessage(ComponentType.NULL, -1, '')
+EMPTY_MSG = UIMessage(MessageType.NULL, "system", None)
 
 class MessageBus:
     def __init__(self):
         self._queue = deque()
 
-    def push(self, msg: UIMessage):
+    def push(self, msg_type: MessageType, sender_id: int, value: Any = None):
+        msg = UIMessage(msg_type, sender_id, value)
         self._queue.append(msg)
 
     def pop(self) -> UIMessage:
         try:
             return self._queue.popleft()
         except IndexError:
-            return EMPTY_MSG  # Return the Null Object instead of None
+            return EMPTY_MSG
 
-    def is_empty(self, msg: UIMessage) -> bool:
-        return msg.sender_type == ComponentType.NULL
-
-# Global instance
 bus = MessageBus()

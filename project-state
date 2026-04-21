@@ -6,3 +6,29 @@ Architecture:
 - GUI Tkinter components that rely upon a message passing system to communicate with the system model
 - Frequency Analysis: numpy and pandas driven with some custom dsp logic
 - Model: run DSP or UI logic based on message polling from a singular message bus
+
+
+GUI structure:
+
+main frame that contains all child frames,
+- top menu frame
+  - file drop down
+    - import drop down option
+    - export drop down option
+  - Action drop down
+     - sort
+     - analyze
+
+- content frame
+  - element list: contains a vertically scrolling list with a label that contains element number and element name (truncated if it's overly long)
+
+- graphics and action frame
+  - sample frame: shows a simple graphic of the sample along with what overlay or highlight that shows the section that will be analyzed
+    - start point entry box tht allows users to choose the start point of the analysis
+    - end point entry box that allows users to choose the end point of the analysis
+  - spectrum frame: shows a frequency spectrum of the analyzed audio
+    - fundamental frequency index text entry that allows the user to manually choose the index to be used for resynthesis
+  - Resynthesis frame: shows the resynthesized single cycle waveform
+  - Reanalyze button: allows the currently active element to be reprocessed based on user changes
+
+- info panel frame: shows various context sensitive details depending on where the mouse is hovering

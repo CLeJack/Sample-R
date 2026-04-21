@@ -3,16 +3,34 @@ from pathlib import Path
 import wave
 import numpy as np
 
-def get_files_in_cwd(path):
-    paths = os.listdir(path)
-    paths = list(map(lambda p: Path(os.getcwd())/ p, paths))
-    return paths
+# def get_files_in_cwd(path):
+#     paths = os.listdir(path)
+#     paths = list(map(lambda p: Path(os.getcwd())/ p, paths))
+#     return paths
 
 
-def get_files(path):
-    paths = os.listdir(path)
-    paths = list(map(lambda p: Path(path) / p, paths))
-    return paths
+# def get_files(path):
+#     paths = os.listdir(path)
+#     paths = list(map(lambda p: Path(path) / p, paths))
+#     return paths
+
+
+def get_files_in_cwd():
+    return get_files(Path.cwd())
+
+def get_files(path, extensions=None):
+    p = Path(path)
+    if not p.is_dir():
+        return []
+
+    # iterdir() is cleaner than os.listdir + mapping
+    files = [f for f in p.iterdir() if f.is_file()]
+
+    # if extensions:
+    #     extensions = [ext.lower() for ext in extensions]
+    #     files = [f for f in files if f.suffix.lower() in extensions]
+
+    return files
 
 
 def export_wavetable(data, path = "./", filename = "output", prepend = "", srate = 44100, channels = 1, sample_width = 2):

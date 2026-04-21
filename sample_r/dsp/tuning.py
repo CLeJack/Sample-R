@@ -62,7 +62,7 @@ def pitch_class_to_freq(text):
 
         n = (index + offset) + 12 * int(octave)
         
-        output = T.REFFREQ * T.SEMITONE ** n
+        output = REFFREQ * SEMITONE ** n
         print(f"Detected pitch class {pitch_class} {accidental} {octave} | Freq: {output}\n")
 
     else:

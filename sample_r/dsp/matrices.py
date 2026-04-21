@@ -5,7 +5,7 @@ A variation on the idea of the discrete fourier transform
 
 """
 import numpy as np
-import waveforms as W
+import sample_r.dsp.waveforms as W
 
 
 def harmonic_matrix(samples, srate, freq, harmonics = 64):

@@ -2,57 +2,57 @@ import pandas as pd
 import numpy as np
 import wave
 
-import tuning as T
-import matrices as M
-from reexport import export_wavetable
+import sample_r.dsp.tuning as T
+import sample_r.dsp.matrices as M
+from sample_r.io import export_wavetable, get_files
+from pathlib import Path
 
 class AudioData:
-
-    def __init__(self, path, id, framesize, min_freq):
-
-
-        self.min_freq = min_freq
-        self.path = path
+    def __init__(self, path: Path, id: int, framesize: int):
+        self.path = Path(path)
         self.id = id
         self.framesize = framesize
+        self.name = self.path.stem
 
         self.srate = 0
-        self.min_freq = 0
-        self.data= np.zeros(1)
-        self.name = ""
-        self.nspectrum = [] # note (12tet) based frequency spectrum
-        self.hspect
-        rum = [] # harmonic based frequency spectrum built from the fundamental
-        self.nmat = [] # note based dft matrix
-        self.hmat = [] # harmonic based dft matrix
-        self.nfreqs = [] # note frequencies
-        self.hfreqs = [] # harmonic frequencies
-        self.frame = [] # the frame meant for export
-        self.df = None
-        self.fundamental_ind = 0 # dervied from nfreqs
+        self.data = np.array([], dtype=np.float32)
+        self.start_index = 0
+        self.end_index = 0
+        
+        # Analysis Placeholders
+        self.spectrum = None
+        self.fundamental_ind = 0
         self.fundamental_freq = 0
 
+        self.harmonics = None
+
+        self._load_audio()
+
+    def _load_audio(self):
         try:
-            with wave.open(str(path), 'rb') as wf:
+            with wave.open(str(self.path), 'rb') as wf:
+                nchannels = wf.getnchannels()
+                self.srate = wf.getframerate()
+                nframes = wf.getnframes()
 
-                nchannels = wf.getnchannels() 
-                self.srate = wf.getframerate() 
+                # Read raw bytes and convert to int16
+                raw_data = np.frombuffer(wf.readframes(nframes), dtype=np.int16)
 
-                self.data = np.frombuffer(wf.readframes(wf.getnframes()), np.int16)
+                # Handle Interleaving (Stereo to Mono)
+                if nchannels > 1:
+                    # Reshape to [nframes, nchannels]
+                    reshaped = raw_data.reshape(-1, nchannels)
+                    # Mean across channels for a proper mono mixdown
+                    self.data = reshaped.mean(axis=1)
+                else:
+                    self.data = raw_data.astype(np.float32)
 
-                # no stereo allowed
-                if nchannels> 1:
-                    self.data = self.data.sum(axis = 0)
-
-                # assuming some path and .wav files only for input
-                self.path = path
-                self.name = path.stem
-                
+                # Normalize to -1.0 to 1.0 range
+                self.data /= 32768.0
+                self.end_index = len(self.data) - 1
 
         except Exception as e:
-            print("~~~~ Error during import ~~~~")
-            print(e)
-            print("~~~~ Error during import ~~~~")
+            print(f"~~~~ Error importing {self.name} ~~~~\n{e}")
 
 class Audio2WavetableN(AudioData):
 
