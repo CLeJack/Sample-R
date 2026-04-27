@@ -1,45 +1,42 @@
-import tkinter as tk
-from tkinter import filedialog
-from sample_r.components.base import BaseComponent
-from sample_r.bus import bus, MessageType
+import dearpygui.dearpygui as dpg
 
-class TopMenu(tk.Menu, BaseComponent):
-    def __init__(self, master, **kwargs):
-        # ID 0 for the entry-point component
-        BaseComponent.__init__(self, 0, MessageType.TOP_MENU)
-        tk.Menu.__init__(self, master, **kwargs)
+def menu_callback(sender, app_data = 1):
+    """Generic placeholder for menu actions."""
+    print(f"Command Received: {dpg.get_item_label(sender)}")
 
-        # Initialize Dropdowns
-        self._setup_file_menu()
-        self._setup_action_menu()
-
-    def _setup_file_menu(self):
-        file_menu = tk.Menu(self, tearoff=0)
-        self.add_cascade(label="File", menu=file_menu)
+def create_top_menu():
+    """
+    Creates the Top Menu panel.
+    Calculates height as 10% of parent_height.
+    """
+    # menu_height = int(parent_height * 0.10)
+    
+    with dpg.viewport_menu_bar():
+        with dpg.menu(label="File"):
+            dpg.add_menu_item(label="Import", callback=menu_callback)
+            dpg.add_menu_item(label="Export", callback=menu_callback)
         
-        file_menu.add_command(label="Import", command=self._on_import)
-        file_menu.add_command(label="Export", command=self._on_export)
+        with dpg.menu(label="Action"):
+            dpg.add_menu_item(label="Sort", callback=menu_callback)
+            dpg.add_menu_item(label="Analyze", callback=menu_callback)
 
-    def _setup_action_menu(self):
-        action_menu = tk.Menu(self, tearoff=0)
-        self.add_cascade(label="Action", menu=action_menu)
-        
-        action_menu.add_command(label="Sort", command=lambda: self.emit("SORT_REQUEST"))
-        action_menu.add_command(label="Analyze All", command=lambda: self.emit("ANALYZE_ALL"))
 
-    def _on_import(self):
-        # Open file dialog for audio files
-        paths = filedialog.askopenfilenames(
-            title="Import Samples",
-            filetypes=[("Audio Files", "*.wav *.flac *.mp3"), ("All Files", "*.*")]
-        )
-        if paths:
-            bus.push(MessageType.IMPORT, self.cid, paths)
-        else:
-            bus.push(MessageType.IMPORT_FAILURE, self.cid, [])
+if __name__ == "__main__":
+    dpg.create_context()
 
-    def _on_export(self):
-        # Logic for choosing export directory or filename
-        path = filedialog.asksaveasfilename(title="resynthesis.wav")
-        if path:
-            bus.push(MessageType.FILE_EXPORT, self.cid, path)
+    # Initial window setup
+    WIDTH = 1280
+    HEIGHT = 720
+    
+    dpg.create_viewport(title='Sample-R', width=WIDTH, height=HEIGHT)
+    
+    # Procedural call to build the UI component
+    create_top_menu()
+    
+    # Register the resize callback to keep things proportional
+    # dpg.set_viewport_resize_callback(resize_handler)
+
+    dpg.setup_dearpygui()
+    dpg.show_viewport()
+    dpg.start_dearpygui()
+    dpg.destroy_context()
