@@ -6,15 +6,19 @@ from typing import Any
 class MessageType(Enum):
     NULL = auto()
     # System/File Events
-    IMPORT = auto()
+    IMPORT_FILES = auto()
+    IMPORT_FOLDER = auto()
     IMPORT_FAILURE = auto()
-    EXPORT = auto()
+    EXPORT_CYCLES = auto()
+    EXPORT_WAVETABLE = auto()
     # UI State Events
     ELEMENT_SELECTED = auto()
     DATA_LOADED = auto()
     # Action Events
     REQ_REANALYZE = auto()
     UPDATE_INFO = auto()
+    SORT = auto()
+    ANALYZE = auto()
     TOP_MENU = auto()
 
 @dataclass(frozen=True)
@@ -29,7 +33,7 @@ class MessageBus:
     def __init__(self):
         self._queue = deque()
 
-    def push(self, msg_type: MessageType, sender_id: int, value: Any = None):
+    def push(self, msg_type: MessageType, value: Any = "", sender_id: int = 0):
         msg = UIMessage(msg_type, sender_id, value)
         self._queue.append(msg)
 
