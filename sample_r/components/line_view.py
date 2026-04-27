@@ -3,12 +3,9 @@ from sample_r.bus import bus, MessageType
 import dearpygui.dearpygui as dpg
 import numpy as np
 
-def data_list_callback(sender, app_data):
-    pass
+def create_line_view(values, width, height):
 
-def create_sample_view(values, width, height):
-
-    with dpg.window(label="sample_window", no_close=True):
+    with dpg.window(label="sample_window", no_close=True, no_resize=True, no_move= True):
         with dpg.drawlist(width=width, height= height):
             dpg.draw_polyline(values)
 
@@ -18,7 +15,7 @@ def create_sample_view(values, width, height):
 
 if __name__ == "__main__":
 
-    #python -m sample_r.components.sample_view
+    #python -m sample_r.components.line_view
     dpg.create_context()
 
     # Initial window setup
@@ -31,7 +28,7 @@ if __name__ == "__main__":
     rng = np.random.default_rng()
     v = 100
 
-    ys = (rng.random(v) * wheight + wheight*.5).tolist()
+    ys = (rng.random(v) * wheight).tolist()
     xs = (np.linspace(0,1, v, endpoint=False) * wwidth).tolist()
     values = list(zip(xs,ys))
 
@@ -39,7 +36,7 @@ if __name__ == "__main__":
     
     dpg.create_viewport(title='Sample-R', width=WIDTH, height=HEIGHT)
     
-    create_sample_view(values, wwidth, wheight)
+    create_line_view(values, wwidth, wheight)
     
     # Register the resize callback to keep things proportional
     # dpg.set_viewport_resize_callback(resize_handler)

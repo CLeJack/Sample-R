@@ -2,14 +2,14 @@
 from sample_r.bus import bus, MessageType
 import dearpygui.dearpygui as dpg
 
-def data_list_callback(sender, app_data):
+def file_list_callback(sender, app_data):
     pass
 
 def create_data_list(values):
 
     with dpg.table(header_row=False, row_background=True,
                    borders_innerH=True, borders_outerH=True, borders_innerV=True,
-                   borders_outerV=True, label = "data_list",n):
+                   borders_outerV=True, label = "data_list"):
         dpg.add_table_column()
 
         for v in values:
