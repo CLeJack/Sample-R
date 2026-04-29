@@ -18,7 +18,7 @@ import numpy as np
 def get_files_in_cwd():
     return get_files(Path.cwd())
 
-def get_files(path, extensions=None):
+def get_files(path):
     p = Path(path)
     if not p.is_dir():
         return []
@@ -26,9 +26,7 @@ def get_files(path, extensions=None):
     # iterdir() is cleaner than os.listdir + mapping
     files = [f for f in p.iterdir() if f.is_file()]
 
-    # if extensions:
-    #     extensions = [ext.lower() for ext in extensions]
-    #     files = [f for f in files if f.suffix.lower() in extensions]
+    files = list(filter(lambda x: '.wav' in str(x),files))
 
     return files
 
