@@ -3,16 +3,6 @@ from pathlib import Path
 import wave
 import numpy as np
 
-# def get_files_in_cwd(path):
-#     paths = os.listdir(path)
-#     paths = list(map(lambda p: Path(os.getcwd())/ p, paths))
-#     return paths
-
-
-# def get_files(path):
-#     paths = os.listdir(path)
-#     paths = list(map(lambda p: Path(path) / p, paths))
-#     return paths
 
 
 def get_files_in_cwd():

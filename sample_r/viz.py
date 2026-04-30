@@ -2,7 +2,15 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 
-def create_resynthesis_row(fig, audio_data, spectrum, harmonics, single_cycle, row_idx, start, end, name):
+def create_resynthesis_row(row_idx, fig, obj):
+
+    audio_data = obj.data
+    start = obj.start_index
+    end = obj.end_index
+    spectrum = obj.spectrum
+    harmonics = obj.harmonics[:len(obj.harmonics)//2]
+    single_cycle = obj.frame
+    name = obj.name
     
     fig.add_trace(
         go.Scatter(y=audio_data, line=dict(color='rgb(0,100,255)')),
@@ -82,15 +90,9 @@ def generate_master_plot(audio_objects):
         # Calculate row offset (1, 3, 5...)
         start_row = (i * 2) + 1
         create_resynthesis_row(
-            fig, 
-            obj.data, 
-            obj.spectrum, 
-            obj.harmonics, 
-            obj.frame, 
-            start_row, 
-            obj.start_index,
-            obj.end_index,
-            obj.name
+            start_row,
+            fig,
+            obj
         )
 
     for i in range(1, num_samples):

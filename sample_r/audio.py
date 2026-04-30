@@ -2,16 +2,14 @@ import pandas as pd
 import numpy as np
 import wave
 
-import tuning as T
-import matrices as M
 import files as IO
 from pathlib import Path
 
 class AudioData:
-    def __init__(self, path: Path, id: int = 0, framesize: int = 2048):
+    def __init__(self, path: Path, id: int = 0, analysis_type = 0):
         self.path = Path(path)
         self.id = id
-        self.framesize = framesize
+        self.framesize = 2048
         self.name = self.path.stem
 
         self.srate = 0
@@ -22,10 +20,12 @@ class AudioData:
         
         # Analysis Placeholders
         self.spectrum = np.zeros(1)
-        self.fundamental_ind = 0
 
         self.harmonics = np.zeros(1)
-        self.frame = np.zeros(framesize)
+        self.analysis = pd.DataFrame()
+        self.analysis_type = analysis_type
+        self.compression_level = 10
+        self.frame = np.zeros(self.framesize)
 
         self._load_audio()
 
@@ -73,7 +73,7 @@ class AudioData:
                 
 
         except Exception as e:
-            print(f"~~~~ Error importing {self.name} ~~~~\n{e}")
+            print(f"~~~~ Error importing {self.id}) {self.name} ~~~~\n{e}")
 
     def set_start_index(self, ind):
         self.start_index = ind
@@ -90,28 +90,70 @@ class AudioData:
         
         return self.spectrum
 
-    def set_harmonics(self, limit = 128):
-        # this algo takes a given frequency spectrum of an arbitrary size, 
-        # and reduces it to a number of harmonics set by the limit
-        # being greedy (i.e. going over 128) will produce a ringing like output during single cycle resynthesis
 
-        iterations = int(np.log2(self.spectrum.size)) - int(np.log2(limit))
-        
-        df = pd.DataFrame(self.spectrum,columns = ['spec'])
+    def analyze(self):
+        # binary spectrum resolution reduction
+        try:
 
-        for i in range(iterations):
-            df['ind'] = np.arange(len(df))//2
-            harmonics = df.groupby('ind').max()['spec'].values
-            harmonics[0] = 0
-            df = pd.DataFrame(harmonics, columns = ['spec'])
-        harmonics = harmonics[:limit]
-        harmonics = harmonics/np.sum(harmonics)
-        self.harmonics = harmonics
+            f = 0
+            match self.analysis_type:
+                case 0:
+                    f = 'max'
+                case 1:
+                    f = 'sum'
+                case _:
+                    f = 'max'
+    
+                    
 
+            iterations = int(np.log2(len(self.spectrum)))
+            
+            df = pd.DataFrame(self.spectrum,columns = ['spec'])
+            data = {0: df['spec'].values}
+            for i in range(1, iterations):
+                df['ind'] = np.arange(len(df))//pow(2,i)
+                harmonics = df.groupby('ind').transform(f).values.flatten()
+                data[i] = harmonics
 
-    def resynthesize_cycle(self, limit = 128):
+            self.analysis = pd.DataFrame(data)
+            self.set_compression_level()
+        except Exception as e:
+            print(f'Error analyzing file: {self.id}) {self.name}')
+
+    def set_compression_level(self):
+        try:
+            data = self.analysis.iloc[0,:]
+            ref = np.mean(data)
+            data = data[data <= ref]
+            self.compression_level = int(data[-1:].index[0])
+        except Exception as e:
+            print(f'Error setting compression of {self.name}, using default')
+            i = int(np.log2(len(self.spectrum)))
+            if i < 10:
+                # on error just go to the default if the spectrum size is already under 2^10
+                self.compression_level = 0
+            else:
+                # compression level of 10 is associated with a framesize of 2^10 or 1024
+                # i.e. if the sample size of the spectrum is greater than 1024
+                # set index associated with a size of 1024 bins; the ifft will map this back to 2048 
+                self.compression_level = i - 10
+
+    def set_harmonics(self):
+
+            ind = self.compression_level
+            data = self.analysis[ind]
+
+            t = data.diff().fillna(data[0])
+            t = data[t != 0].values
+
+            self.harmonics = t
+            self.harmonics[0] = 0
+                
+
+    def resynthesize_cycle(self):
+        limit = self.framesize//2
         output = []
-        end = min(limit, self.harmonics.size)
+        end = min(limit, len(self.harmonics))
         for i,amp in enumerate(self.harmonics[:end]):
             xs = np.linspace(0,2*np.pi,self.framesize, endpoint=False) * i
             output.append(amp * np.sin(xs))
