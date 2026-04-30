@@ -138,7 +138,7 @@ class AudioData:
                 # set index associated with a size of 1024 bins; the ifft will map this back to 2048 
                 self.compression_level = i - 10
 
-    def set_harmonics(self):
+    def create_harmonics(self):
 
             ind = self.compression_level
             data = self.analysis[ind]
@@ -147,7 +147,15 @@ class AudioData:
             t = data[t != 0].values
 
             self.harmonics = t
-            self.harmonics[0] = 0
+    def set_harmonic(self, index, val):
+        self.harmonics[index] = val
+
+    def pad_harmonics(self, n):
+        
+        if n > 0:
+            self.harmonics = np.pad(self.harmonics,(0,n),mode='constant',constant_values=0)
+        if n < 0:
+            self.harmonics = np.pad(self.harmonics,(abs(n),0),mode='constant',constant_values=0)
                 
 
     def resynthesize_cycle(self):
