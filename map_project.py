@@ -26,7 +26,7 @@ def draw_tree(directory: Path, prefix: str = "", ignore_list: set = None):
         return
 
     # Filter ignored items
-    visible_items = [i for i in items if i.name not in ignore_list]
+    visible_items = [i for i in items if i.name not in ignore_list and i.suffix != ".wav"]
     
     for i, item in enumerate(visible_items):
         is_last = (i == len(visible_items) - 1)

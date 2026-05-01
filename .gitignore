@@ -6,3 +6,4 @@ data/output/*
 !data/output/.gitkeep
 /notebook/
 __pycache__
+*.wav
