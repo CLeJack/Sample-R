@@ -10,8 +10,10 @@ def get_files_in_cwd():
 
 def get_files(path):
     if type(path) is type([]):
+        #file dialog returned explicit file list
         files = path
     else:
+        # folder returned
         p = Path(path)
         if not p.is_dir():
             return []
@@ -39,9 +41,9 @@ def export_wavetable(data, path = "./", filename = "output", prepend = "", srate
         wf.setframerate(srate)
         wf.writeframes(audio_frames)
 
-    print(f"Successfully wrote {filename}")
+    # print(f"Successfully wrote {filename}")
 
 def consolidated_export(data, path = "./", filename = "output",srate = 44100, channels = 1, sample_width = 2):
      wt = [d.frame for d in data]
      wt = np.array(wt)
-     export_wavetable(wt,path, filename, '', srate, channels, sample_width)
+     export_wavetable(wt,path, filename + ".wav", '', srate, channels, sample_width)

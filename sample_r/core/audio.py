@@ -17,11 +17,14 @@ class AudioData:
         self.com = 0 #center of "mass" used to automatically get the highest volume area of the audio
         self.start_index = 0
         self.end_index = 0
+
+        self.roll = 0
         
         # Analysis Placeholders
         self.spectrum = np.zeros(1)
 
         self.harmonics = np.zeros(1)
+        self.hview = np.zeros(1)
         self.analysis = pd.DataFrame()
         self.analysis_type = analysis_type
         self.quantization_level = 10
@@ -36,7 +39,7 @@ class AudioData:
                 self.srate = wf.getframerate()
                 nframes = wf.getnframes()
 
-                # Read raw bytes and convert to int16
+
                 raw_data = np.frombuffer(wf.readframes(nframes), dtype=np.int16)
 
                 # Handle Interleaving (Stereo to Mono)
@@ -48,25 +51,30 @@ class AudioData:
                 else:
                     self.data = raw_data.astype(np.float32)
 
-                # Normalize to -1.0 to 1.0 range
-                self.data /= 32768.0
+                #Normalize
+                self.data /= np.max(np.abs(self.data)) + 1
+
                 self.end_index = len(self.data) - 1
                 
+                #center of mass or energy
                 numerator = np.sum(np.abs(self.data) * np.arange(self.data.size))
                 denominator = np.sum(np.abs(self.data))
                 
                 self.com = np.round(numerator/denominator).astype(int) #nearest index
-                self.com = self.end_index if self.com > self.end_index else self.com 
+                self.com = self.end_index//2 if self.com > self.end_index else self.com # the true path shouldn't be possible, but just in case
+                
+                # using 1024 as the initial range instead of 2048
+                # associated with slight under 50 hz pr A1 at 48khz sample rate
+                # this is a decent lower bound for tonal information
+                s = int(self.com - self.framesize//4) 
+                e = int(self.com + self.framesize//4)
+                
+                # orient the initial analysis to include the frame size centered around the point of highest energy
+                # this will typically be associated with the initial transient or the peak of a swell
+                self.start_index = s if s > self.start_index else self.start_index
+                self.end_index = e if e < self.end_index else self.end_index
 
-                if(self.srate < self.end_index):
-                    # set analysis window around center of energy for the signal
-                    offset = self.srate//2
-                    start = self.com - offset
-                    end = self.com + offset
-
-                    if(end <= self.end_index and start >= self.start_index):
-                        self.start_index = start
-                        self.end_index = end
+    
                 
                 self.spectrum = np.zeros(self.end_index - self.start_index)
                 self.harmonics = np.zeros(64)
@@ -116,11 +124,10 @@ class AudioData:
                 data[i] = harmonics
 
             self.analysis = pd.DataFrame(data)
-            self.set_compression_level()
         except Exception as e:
             print(f'Error analyzing file: {self.id}) {self.name}')
 
-    def set_compression_level(self):
+    def set_quantization_level(self):
         try:
             data = self.analysis.iloc[0,:]
             ref = np.mean(data)
@@ -141,35 +148,52 @@ class AudioData:
     def create_harmonics(self):
 
             ind = self.quantization_level
+            ind = min(ind, len(self.analysis.columns)-1)
             data = self.analysis[ind]
 
             t = data.diff().fillna(data[0])
             t = data[t != 0].values
 
             self.harmonics = t
+            self.roll_harmonics(self.roll)
+            
+
     def set_harmonic(self, index, val):
         self.harmonics[index] = val
+        self.roll_harmonics(self.roll)
 
-    def pad_harmonics(self, n):
-        
+    def roll_harmonics(self, n):
+        self.hview = np.roll(self.harmonics,n)
         if n > 0:
-            self.harmonics = np.pad(self.harmonics,(0,n),mode='constant',constant_values=0)
+            self.hview[:n] = 0
         if n < 0:
-            self.harmonics = np.pad(self.harmonics,(abs(n),0),mode='constant',constant_values=0)
+            self.hview[len(self.hview) + n:] = 0
                 
 
     def resynthesize_cycle(self):
         limit = self.framesize//2
         output = []
-        end = min(limit, len(self.harmonics))
-        for i,amp in enumerate(self.harmonics[:end]):
+        end = min(limit, len(self.hview))
+
+
+        for i,amp in enumerate(self.hview[:end]):
             xs = np.linspace(0,2*np.pi,self.framesize, endpoint=False) * i
             output.append(amp * np.sin(xs))
         
         output = np.array(output)
         output = output.sum(axis=0)
-        output = output/np.abs(output).max()
+        _m = np.abs(output).max()
+        output = output/_m if _m > 0 else output
         self.frame = output
+
+    def full_process(self, internal_quantize = True):
+        self.set_spectrum()
+        self.analyze()
+        if internal_quantize:
+            self.set_quantization_level()
+        self.create_harmonics()
+        self.resynthesize_cycle()
+
             
 
         
