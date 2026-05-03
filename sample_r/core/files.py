@@ -26,7 +26,7 @@ def get_files(path):
     return files
 
 
-def export_wavetable(data, path = "./", filename = "output", prepend = "", srate = 44100, channels = 1, sample_width = 2):
+def export_frame(data, path = "./", filename = "output", prepend = "", srate = 44100, channels = 1, sample_width = 2):
     p = Path(path)
     filename = prepend+filename+".wav"
     p = p / filename
@@ -46,4 +46,11 @@ def export_wavetable(data, path = "./", filename = "output", prepend = "", srate
 def consolidated_export(data, path = "./", filename = "output",srate = 44100, channels = 1, sample_width = 2):
      wt = [d.frame for d in data]
      wt = np.array(wt)
-     export_wavetable(wt,path, filename + ".wav", '', srate, channels, sample_width)
+     export_frame(wt,path, filename + ".wav", '', srate, channels, sample_width)
+
+def export_wavetable(data, path = "./", filename = "output", prepend = "", srate = 44100, channels = 1, sample_width = 2):
+    assert isinstance(data, list)
+    d = np.array(data)
+    frame_size = d.size[0] * d.size[1]
+    d = d.reshape((1,frame_size))
+    export_frame(d, path, filename, prepend, srate, channels, sample_width)
