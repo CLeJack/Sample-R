@@ -65,6 +65,7 @@ class App:
     
     def load(paths):        
         files = IO.get_files(paths)
+        files.sort()
         if(len(files) > 0):
             App.file_queue = deque(files)
             App.audio = []
@@ -138,12 +139,12 @@ class App:
     
     def prev_file_callback():
         v = dpg.get_value(Tag.CURRENT_FILE_SLIDER)
-        dpg.set_value(Tag.CURRENT_FILE_SLIDER, v - 1)
+        dpg.set_value(Tag.CURRENT_FILE_SLIDER, max(0,v - 1))
         App.current_file_callback()
     
     def next_file_callback():
         v = dpg.get_value(Tag.CURRENT_FILE_SLIDER)
-        dpg.set_value(Tag.CURRENT_FILE_SLIDER, v + 1)
+        dpg.set_value(Tag.CURRENT_FILE_SLIDER, min(v + 1, len(App.audio) - 1))
         App.current_file_callback()
 
     def sample_boundary_callback():
@@ -184,7 +185,7 @@ class App:
         for a in App.audio:
             frames.append(a.frame)
         
-        IO.export_wavetable(frames, app.export_dir, App.audio[0].name)
+        IO.export_wavetable(frames, App.export_dir, App.audio[0].name)
         App.log(f'Exported {App.audio[0].name}')
         App.redraw()
 

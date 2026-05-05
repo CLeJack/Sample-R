@@ -51,6 +51,6 @@ def consolidated_export(data, path = "./", filename = "output",srate = 44100, ch
 def export_wavetable(data, path = "./", filename = "output", prepend = "", srate = 44100, channels = 1, sample_width = 2):
     assert isinstance(data, list)
     d = np.array(data)
-    frame_size = d.size[0] * d.size[1]
+    frame_size = d.shape[0] * d.shape[1]
     d = d.reshape((1,frame_size))
     export_frame(d, path, filename, prepend, srate, channels, sample_width)
